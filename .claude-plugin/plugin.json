@@ -1,0 +1,19 @@
+{
+  "name": "engineering-operations",
+  "version": "0.1.0",
+  "description": "Engineering operations role: reads every role's reports (workflow results, gap logs, CI and review outcomes, usage and spend), measures cost, flow and quality across the team, sends a few scoped, read-only investigators to find workflow problems and waste, and drives measured improvements through the roles that own them.",
+  "author": {
+    "name": "opsroller"
+  },
+  "repository": "https://github.com/opsroller/engineering-operations",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "role",
+    "job-function",
+    "engineering-operations",
+    "finops",
+    "developer-productivity",
+    "continuous-improvement",
+    "reporting"
+  ]
+}
