@@ -105,7 +105,7 @@ const RUN_OUT = await Promise.race([RUN.halted, (async (agent, phase, log) => {
 // --- run-modes v2 end (workflow body follows; close it with the tail line) ---
 
 const window = (args && args.window) || 'since the last operations review recorded in the project (or the last 7 days if there is none)'
-const requested = args && Number.isInteger(args.max_investigations) ? args.max_investigations : 1
+const requested = args && args.max_investigations !== undefined && Number.isInteger(Number(args.max_investigations)) ? Number(args.max_investigations) : 1
 const maxInvestigations = Math.max(0, Math.min(3, requested))
 const records = (args && args.records) || "the record locations named in the project's CLAUDE.md or profile"
 const audience = (args && args.audience) || "the project's coordinator"
@@ -159,7 +159,7 @@ const deferred = analysis.questions.slice(maxInvestigations).map(q => q.question
 
 phase('Challenge')
 const challenge = analysis.findings.length
-  ? await agent(`Act as an independent reviewer of these findings; you did not write them. Read-only. Do not edit anything. For each finding, open its evidence links and check: the evidence shows what the finding claims; the size is computed over the stated window; the cause is a system cause, not blame on an agent or person; one owner can act on it; the investigation answers support it. Return a verdict per finding: confirmed, weakened (say what is overstated) or dropped (say why).\n${JSON.stringify({ findings: analysis.findings, investigations: investigated })}`, { schema: VERDICTS, phase: 'Challenge', label: 'challenge', independent: true })
+  ? await agent(`Act as an independent reviewer of these findings; you did not write them. Judge them by the engineering-operations waste-hunting skill's finding format and rules. Read-only. Do not edit anything. For each finding, open its evidence links and check: the evidence shows what the finding claims; the size is computed over the stated window; the cause is a system cause, not blame on an agent or person; one owner can act on it; the investigation answers support it. Return a verdict per finding: confirmed, weakened (say what is overstated) or dropped (say why).\n${JSON.stringify({ findings: analysis.findings, investigations: investigated })}`, { schema: VERDICTS, phase: 'Challenge', label: 'challenge', independent: true })
   : { verdicts: [] }
 const verdictOf = id => ((challenge && challenge.verdicts) || []).find(v => v.id === id)
 const kept = analysis.findings
@@ -167,7 +167,7 @@ const kept = analysis.findings
   .filter(f => f.verdict !== 'dropped')
 
 phase('Record')
-const recorded = await agent(`Docs plan: this review changes reference docs only (the project's operations reference: measures with values and baselines, the findings record, the review log with what this review cost). Do: add the measures, the kept findings with their verdicts, and one review-log entry for ${window} in one edit, describing state only (no narrative). Findings marked unchecked say so. Then check (the project's Diataxis guide): each touched page holds one kind (reference), keeps its existing format and links to related pages. Report pages touched.\n${JSON.stringify({ measures: collected.measures, findings: kept, investigations: investigated, deferred_questions: deferred, data_gaps: collected.data_gaps })}`, { phase: 'Record', label: 'record' })
+const recorded = await agent(`Follow the engineering-operations operating-data skill's measure format. Docs plan: this review changes reference docs only (the project's operations reference: measures with values and baselines, the findings record, the review log with what this review cost). Do: add the measures, the kept findings with their verdicts, and one review-log entry for ${window} in one edit, describing state only (no narrative). Findings marked unchecked say so. Then check (the project's Diataxis guide): each touched page holds one kind (reference), keeps its existing format and links to related pages. Report pages touched.\n${JSON.stringify({ measures: collected.measures, findings: kept, investigations: investigated, deferred_questions: deferred, data_gaps: collected.data_gaps })}`, { phase: 'Record', label: 'record' })
 
 phase('Report')
 const report = await agent(`Follow the engineering-operations operations-reporting skill. Write the scorecard for ${audience}. First line: what needs action and from whom (or "Nothing needs action"). Then cost, flow, quality and method lines with baselines and trends, pairs side by side; the top three kept findings by size with owners; data gaps; and what this review cost (agents run: ${2 + sent.length + (analysis.findings.length ? 1 : 0) + 2}). Team-level only: no agent or person named or ranked. Return only the report text.\n${JSON.stringify({ measures: collected.measures, spend: collected.spend, budget: collected.budget, anomalies: analysis.anomalies, findings: kept, data_gaps: collected.data_gaps })}`, { phase: 'Report', label: 'report' })

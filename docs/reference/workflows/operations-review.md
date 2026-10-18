@@ -9,7 +9,7 @@ File: `workflows/operations-review.js`.
 | Arg | Required | Meaning |
 |---|---|---|
 | `window` | no | Period to review; default: since the last review in the review log, or the last 7 days |
-| `max_investigations` | no | Investigators to send, 0 to 3; default 1; values outside the range are clamped |
+| `max_investigations` | no | Investigators to send, 0 to 3 (a number or numeric string); default 1, also used when the value is not a whole number; values outside the range are clamped |
 | `records` | no | Where the records live; default: the locations named in `CLAUDE.md` or the profile |
 | `audience` | no | Who the scorecard is for; default: the project's coordinator |
 

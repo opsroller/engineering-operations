@@ -117,7 +117,7 @@ const OUTCOME = { type: 'object', properties: {
 }, required: ['id', 'now', 'guard_now', 'outcome', 'evidence'] }
 
 phase('Read')
-const due = await agent(`Follow engineering-practices project-onboarding. Read-only. Read the improvements record in the project's operations reference and list ${which}: id, title, owner, when it landed, hypothesis, measure with baseline and target, guard measure and window. Edit nothing.`, { schema: DUE, phase: 'Read', label: 'read-due' })
+const due = await agent(`Follow engineering-practices project-onboarding, then the engineering-operations improvement-cycle skill's improvement format. Read-only. Read the improvements record in the project's operations reference and list ${which}: id, title, owner, when it landed, hypothesis, measure with baseline and target, guard measure and window. Edit nothing.`, { schema: DUE, phase: 'Read', label: 'read-due' })
 if (!due) return 'improvement-check stopped: could not read the improvements record.'
 if (!due.improvements.length) return 'No improvements are due for a check.'
 
@@ -126,7 +126,7 @@ const measured = await pipeline(due.improvements, i => agent(`Follow the enginee
 const outcomes = due.improvements.map((i, n) => measured[n] || { id: i.id, now: 'unknown', guard_now: 'unknown', outcome: 'inconclusive', evidence: [], reason: 'measurement failed; unverified' })
 
 phase('Record')
-const recorded = await agent(`Docs plan: this check changes reference docs only (the improvements record and the findings it came from). Do: set each improvement's status to its outcome with the numbers and date, and reopen the source finding of every reverted one, in one edit, describing state only. Then check (the project's Diataxis guide): touched pages hold one kind (reference), keep their format and link to related pages. Report pages touched.\n${JSON.stringify(outcomes)}`, { phase: 'Record', label: 'record-outcomes' })
+const recorded = await agent(`Follow the engineering-operations improvement-cycle skill's Act step. Docs plan: this check changes reference docs only (the improvements record and the findings it came from). Do: set each improvement's status to its outcome with the numbers and date, and reopen the source finding of every reverted one, in one edit, describing state only. Then check (the project's Diataxis guide): touched pages hold one kind (reference), keep their format and link to related pages. Report pages touched.\n${JSON.stringify(outcomes)}`, { phase: 'Record', label: 'record-outcomes' })
 
 phase('Notify')
 const messages = await agent(`Follow the engineering-operations improvement-cycle skill. Draft one short message per owner for these outcomes: the improvement, its measure baseline to now, the guard, the outcome, and for reverted ones what the numbers show and that the change is theirs to undo. For kept changes that should become standard, suggest the owner documents the procedure as a how-to in their docs. Blameless. Return the drafts, one per owner.\n${JSON.stringify({ improvements: due.improvements, outcomes })}`, { phase: 'Notify', label: 'notify-owners' })
